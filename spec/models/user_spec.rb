@@ -7,6 +7,32 @@ describe User do
   end
   subject { @user }
 
+  describe "index" do
+    let(:user) { FactoryGirl.create(:user) }
+    before(:each) do
+        sign_in user
+        vist users_path
+    end
+
+    it { should have_title("All users") }
+    it { shoucl have_content('All users')}
+  end
+
+  describe "pagination" do
+   
+      before(:all) { 30.times { FactoryGirl.create(:user)} }
+      after(:all)  { user.delete_all }
+
+      it { should have_selector('div.pagination') }
+
+      it "should list each user" do
+          User.pagniate(page: 1).each do |user|
+              expect(page).to have_selector('li',text: user.name)
+          end
+      end
+
+  end
+
   it { should respond_to(:name) }
   it { should respond_to(:email) }
   it { should respond_to(:password_digest) }
@@ -16,6 +42,13 @@ describe User do
   it { should respond_to(:authenticate)}
 
   it { should be_valid }
+
+  describe "with admin attribute set to 'true' " do
+     before do
+        @user.save!
+        
+     end
+  end
 
   describe "remember token" do
      before { @user.save }
